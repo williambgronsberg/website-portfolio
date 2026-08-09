@@ -1,0 +1,480 @@
+<!-- 
+  @Author: William Berge Groensberg
+  @Date:   2026-05-02 23:52:16
+  @Last Modified by:   William Berge Groensberg
+  @Last Modified time: 2026-05-03 02:46:57
+-->
+<!DOCTYPE html>
+<html lang="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Edge Branding</title>
+
+	<style>
+		*{box-sizing:border-box;margin:0;padding:0}
+
+		html,body{
+			background:#0c0c0c;
+			color:#f5f5f5;
+			font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+		}
+
+		body{padding:24px;-webkit-font-smoothing:antialiased}
+		img{display:block;width:100%}
+
+		.close-btn{
+			position:fixed;
+			top:28px;
+			right:28px;
+			width:28px;
+			height:28px;
+			display:flex;
+			align-items:center;
+			justify-content:center;
+			z-index:999;
+			cursor:pointer;
+		}
+
+		.close-btn span{
+			position:absolute;
+			width:20px;
+			height:1.5px;
+			background:rgba(255,255,255,.75);
+			transition:.2s ease;
+		}
+
+		.close-btn span:first-child{transform:rotate(45deg)}
+		.close-btn span:last-child{transform:rotate(-45deg)}
+		.close-btn:hover span{background:#fff}
+
+		.toast{
+			position:fixed;
+			bottom:24px;
+			left:24px;
+			background:#fff;
+			color:#111;
+			padding:10px 14px;
+			font-size:11px;
+			font-family:monospace;
+			text-transform:uppercase;
+			letter-spacing:.12em;
+			opacity:0;
+			transform:translateY(10px);
+			transition:.25s ease;
+			z-index:999;
+			pointer-events:none;
+		}
+
+		.toast.show{
+			opacity:1;
+			transform:translateY(0);
+		}
+
+		.wrapper{
+			max-width:1800px;
+			margin:auto;
+			padding:0 72px;
+		}
+
+		.hero{margin-bottom:72px}
+
+		.hero img{
+			width:100%;
+			max-height:520px;
+			object-fit:cover;
+			border-radius:8px;
+		}
+
+		.grid{
+			display:grid;
+			grid-template-columns:repeat(12,1fr);
+			gap:32px;
+		}
+
+		.side{
+			grid-column:1/4;
+			position:sticky;
+			top:48px;
+			height:fit-content;
+		}
+
+		.side h1{
+			font-size:20px;
+			font-weight:650;
+			margin-bottom:14px;
+		}
+
+		.caption{
+			font-family:monospace;
+			font-size:11px;
+			letter-spacing:.18em;
+			text-transform:uppercase;
+			color:rgba(255,255,255,.36);
+		}
+
+		.content{grid-column:5/13}
+
+		.top{
+			display:grid;
+			grid-template-columns:1fr 1fr;
+			gap:52px;
+			margin-bottom:32px;
+		}
+
+		.lead{
+			font-size:18px;
+			line-height:1.55;
+			font-weight:650;
+		}
+
+		.meta{
+			display:grid;
+			grid-template-columns:repeat(4, minmax(0, 1fr));
+			gap:34px;
+			margin-bottom:56px;
+			align-items:start;
+		}
+
+		.meta > div{
+			min-width:0;
+		}
+
+		.meta p:last-child{
+			margin-top:9px;
+			font-size:16px;
+			line-height:1.45;
+			color:#fff;
+		}
+
+		.links{
+			display:grid;
+			grid-template-columns:1fr 1fr;
+			gap:18px;
+			margin-bottom:44px;
+		}
+
+		.link{
+			height:62px;
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			padding:0 24px;
+			border:1px solid rgba(255,255,255,.09);
+			border-radius:6px;
+			background:rgba(255,255,255,.025);
+			text-decoration:none;
+			color:inherit;
+			transition:.2s ease;
+		}
+
+		.link:hover{
+			border-color:#F0FE71;
+			background:rgba(240,254,113,.06);
+			color:#F0FE71;
+		}
+
+		.gallery{
+			display:grid;
+			grid-template-columns:repeat(12,1fr);
+			gap:28px;
+			margin-bottom:90px;
+		}
+
+		.img{
+			border-radius:6px;
+			overflow:hidden;
+			background:#111;
+			position:relative;
+		}
+
+		.img.wide{grid-column:1/13}
+
+		.img.split{
+			grid-column:span 6;
+			aspect-ratio:1/1;
+		}
+
+		.img img{
+			width:100%;
+			height:100%;
+			object-fit:cover;
+			transition:.5s ease;
+		}
+
+		.img:hover img{
+			transform:scale(1.025);
+		}
+
+		.color-card{
+			display:flex;
+			width:100%;
+			height:100%;
+		}
+
+		.color-stripe{
+			flex:1;
+			height:100%;
+			cursor:pointer;
+			transition:.3s ease;
+			border:0;
+			position:relative;
+		}
+
+		.color-stripe:hover{
+			flex:2;
+			z-index:2;
+		}
+
+		.gray{background:#42413D}
+		.black{background:#000}
+		.white{background:#fff}
+		.beige{background:#EBE9E2}
+		.accent{background:#F0FE71}
+
+		.color-stripe::after{
+			content:attr(data-hex);
+			position:absolute;
+			bottom:14px;
+			left:50%;
+			transform:translateX(-50%);
+			font-size:10px;
+			font-family:monospace;
+			color:#000;
+			opacity:0;
+			transition:.2s ease;
+			mix-blend-mode:difference;
+			white-space:nowrap;
+		}
+
+		.color-stripe:hover::after{
+			opacity:1;
+		}
+
+		.section{
+			display:grid;
+			grid-template-columns:repeat(12,1fr);
+			gap:32px;
+			border-top:1px solid rgba(255,255,255,.1);
+			padding-top:34px;
+			margin-bottom:80px;
+		}
+
+		.section h2{
+			grid-column:1/4;
+			font-size:18px;
+			text-transform:uppercase;
+		}
+
+		.section p{
+			grid-column:5/11;
+			font-size:17px;
+			line-height:1.65;
+			color:rgba(255,255,255,.7);
+		}
+
+		@media(max-width:900px){
+			body{padding:14px}
+			.wrapper{padding:0 20px}
+
+			.close-btn{
+				top:18px;
+				right:18px;
+				width:24px;
+				height:24px;
+			}
+
+			.close-btn span{width:16px}
+
+			.hero{
+				display:flex;
+				justify-content:center;
+				margin-bottom:44px;
+			}
+
+			.hero img{
+				max-width:520px;
+				max-height:none;
+				object-fit:contain;
+			}
+
+			.grid{grid-template-columns:1fr}
+			.side,.content{grid-column:1}
+			.side{position:relative;top:0}
+
+			.top{
+				grid-template-columns:1fr;
+				gap:28px;
+			}
+
+			.top > div{
+				display:flex;
+				flex-direction:column;
+				gap:16px;
+			}
+
+			.meta{
+				grid-template-columns:1fr 1fr;
+				gap:18px;
+			}
+
+			.links{grid-template-columns:1fr}
+
+			.gallery{grid-template-columns:1fr}
+			.img.wide,.img.split{grid-column:1}
+
+			.section{grid-template-columns:1fr}
+			.section h2,.section p{grid-column:1}
+		}
+	</style>
+</head>
+
+<body>
+
+	<a href="javascript:history.back()" class="close-btn" aria-label="Close project">
+		<span></span><span></span>
+	</a>
+
+	<div class="toast" id="toast">copied</div>
+
+	<div class="wrapper">
+
+		<div class="hero">
+			<img src="edge_seo.webp" alt="Edge Branding hero">
+		</div>
+
+		<main class="grid">
+
+			<aside class="side">
+				<h1>Edge Branding</h1>
+				<p class="caption">Internship Report</p>
+			</aside>
+
+			<section class="content">
+
+				<div class="top">
+					<div>
+						<p class="lead">
+							This report documents my internship project at Edge Branding, where I worked with visual updates on an existing website. The focus of the report is not only the final result, but also the process, decisions, challenges and learning behind the work.
+						</p>
+					</div>
+
+					<div>
+						<p class="lead">
+							The report explains how I approached the task, how I collaborated with designers, how I used AI as a support tool, and what I learned from working inside a real production environment.
+						</p>
+					</div>
+				</div>
+
+				<div class="meta">
+					<div>
+						<p class="caption">Report focus</p>
+						<p>Process<br>Reflection</p>
+					</div>
+
+					<div>
+						<p class="caption">Role</p>
+						<p>Frontend Intern</p>
+					</div>
+
+					<div>
+						<p class="caption">Tools</p>
+						<p>Statamic<br>CSS<br>Claude Code</p>
+					</div>
+
+					<div>
+						<p class="caption">Period</p>
+						<p>2025–2026</p>
+					</div>
+				</div>
+
+				<div class="links">
+					<a href="https://edgebranding.no" class="link">
+						<span class="caption">Website</span>
+						<span>›</span>
+					</a>
+
+					<a href="#" class="link">
+						<span class="caption">Full report</span>
+						<span>›</span>
+					</a>
+				</div>
+
+				<div class="gallery">
+
+					<div class="img wide">
+						<img src="edgerapport.jpg" alt="Edge Branding report mockup">
+					</div>
+
+					<div class="img split">
+						<div class="color-card" aria-label="Project color palette">
+							<button class="color-stripe gray" data-hex="#42413D" aria-label="Copy gray color"></button>
+							<button class="color-stripe black" data-hex="#000000" aria-label="Copy black color"></button>
+							<button class="color-stripe white" data-hex="#FFFFFF" aria-label="Copy white color"></button>
+							<button class="color-stripe beige" data-hex="#EBE9E2" aria-label="Copy beige color"></button>
+							<button class="color-stripe accent" data-hex="#F0FE71" aria-label="Copy accent color"></button>
+						</div>
+					</div>
+
+					<div class="img split">
+						<img src="iphone.jpg" alt="Mobile report preview">
+					</div>
+
+				</div>
+
+				<section class="section">
+					<h2>Process</h2>
+					<p>
+						In the report, I describe how I first analyzed the existing Statamic structure before making changes. I tested the visual updates manually on selected files so I could understand the pattern, then used AI tools to help apply similar changes more efficiently across the website.
+					</p>
+				</section>
+
+				<section class="section">
+					<h2>Reflection</h2>
+					<p>
+						A key part of the report is reflecting on how I worked. I learned that AI can be useful for repetitive tasks, but that I still need to understand the code myself to check quality, avoid mistakes and make sure the result matches the design.
+					</p>
+				</section>
+
+				<section class="section">
+					<h2>Outcome</h2>
+					<p>
+						The report shows how the project gave me experience with real-world frontend work, communication with designers and maintaining consistency in a larger codebase. The most important outcome was not just the visual update, but the understanding I gained from the process.
+					</p>
+				</section>
+
+			</section>
+		</main>
+	</div>
+
+	<script>
+		const stripes = document.querySelectorAll(".color-stripe");
+		const toast = document.getElementById("toast");
+
+		stripes.forEach(stripe => {
+			stripe.addEventListener("click", async () => {
+				const hex = stripe.dataset.hex;
+
+				try {
+					await navigator.clipboard.writeText(hex);
+				} catch {
+					const input = document.createElement("input");
+					input.value = hex;
+					document.body.appendChild(input);
+					input.select();
+					document.execCommand("copy");
+					input.remove();
+				}
+
+				toast.textContent = hex + " copied";
+				toast.classList.add("show");
+
+				setTimeout(() => {
+					toast.classList.remove("show");
+				}, 1300);
+			});
+		});
+	</script>
+
+</body>
+</html>

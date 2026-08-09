@@ -1,0 +1,594 @@
+<!-- 
+  @Author: William Berge Groensberg
+  @Date:   2026-05-04 12:08:35
+  @Last Modified by:   William Berge Groensberg
+  @Last Modified time: 2026-05-11 00:31:04
+-->
+<!DOCTYPE html>
+<html lang="no">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tjenester</title>
+
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0
+		}
+
+		html,
+		body {
+			background: #0c0c0c;
+			color: #f5f5f5;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		}
+
+		body {
+			padding: 24px;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
+
+		.close-btn {
+			position: fixed;
+			top: 28px;
+			right: 28px;
+			width: 28px;
+			height: 28px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 999;
+			cursor: pointer;
+		}
+
+		.close-btn span {
+			position: absolute;
+			width: 20px;
+			height: 1.5px;
+			background: rgba(255, 255, 255, .75);
+			transition: .2s ease;
+		}
+
+		.close-btn span:first-child {
+			transform: rotate(45deg)
+		}
+
+		.close-btn span:last-child {
+			transform: rotate(-45deg)
+		}
+
+		.close-btn:hover span {
+			background: #fff
+		}
+
+		.wrapper {
+			max-width: 1800px;
+			margin: auto;
+			padding: 0 72px;
+		}
+
+		.hero {
+			min-height: 360px;
+			display: flex;
+			align-items: end;
+			border-bottom: 1px solid rgba(255, 255, 255, .1);
+			padding: 120px 0 54px;
+			margin-bottom: 54px;
+		}
+
+		.hero h1 {
+			font-size: clamp(52px, 8vw, 140px);
+			letter-spacing: -.07em;
+			line-height: .9;
+			font-weight: 700;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(12, 1fr);
+			gap: 32px;
+		}
+
+		.side {
+			grid-column: 1/4;
+			position: sticky;
+			top: 48px;
+			height: fit-content;
+		}
+
+		.side h2 {
+			font-size: 20px;
+			font-weight: 650;
+			margin-bottom: 14px;
+		}
+
+		.side p:not(.caption) {
+			font-size: 15px;
+			line-height: 1.6;
+			color: rgba(255, 255, 255, .62);
+			max-width: 280px;
+			margin-top: 22px;
+		}
+
+		.caption {
+			font-family: monospace;
+			font-size: 11px;
+			letter-spacing: .18em;
+			text-transform: uppercase;
+			color: rgba(255, 255, 255, .36);
+		}
+
+		.content {
+			grid-column: 5/13;
+		}
+
+		.intro {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 52px;
+			margin-bottom: 56px;
+		}
+
+		.lead {
+			font-size: 18px;
+			line-height: 1.55;
+			font-weight: 650;
+		}
+
+		.services {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 28px;
+			margin-bottom: 90px;
+		}
+
+		.service {
+			border: 1px solid rgba(255, 255, 255, .09);
+			border-radius: 8px;
+			background: rgba(255, 255, 255, .025);
+			transition: .25s ease;
+			padding: 28px;
+			min-height: 520px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+
+		.service:hover {
+			border-color: #F0FE71;
+			transform: translateY(-4px);
+		}
+
+		.service-top {
+			display: flex;
+			justify-content: space-between;
+			gap: 20px;
+			margin-bottom: 24px;
+		}
+
+		.service h3 {
+			font-size: 30px;
+			font-weight: 650;
+			letter-spacing: -.045em;
+			line-height: 1;
+			max-width: 420px;
+		}
+
+		.arrow {
+			color: rgba(255, 255, 255, .36);
+			font-size: 28px;
+			transition: .2s ease;
+		}
+
+		.service:hover .arrow {
+			color: #F0FE71;
+			transform: translateX(4px);
+		}
+
+		.service-intro {
+			font-size: 15px;
+			line-height: 1.6;
+			color: rgba(255, 255, 255, .64);
+			margin-bottom: 28px;
+			max-width: 480px;
+		}
+
+		.price-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			margin-bottom: 32px;
+		}
+
+		.price-row span {
+			border: 1px solid rgba(255, 255, 255, .1);
+			background: rgba(255, 255, 255, .025);
+			padding: 10px 13px;
+			border-radius: 999px;
+			font-size: 13px;
+			color: rgba(255, 255, 255, .78);
+		}
+
+		.service-section {
+			border-top: 1px solid rgba(255, 255, 255, .09);
+			padding-top: 18px;
+			margin-top: 18px;
+		}
+
+		.service-section h4 {
+			font-size: 13px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .12em;
+			color: rgba(255, 255, 255, .44);
+			margin-bottom: 12px;
+		}
+
+		.service-section p {
+			font-size: 15px;
+			line-height: 1.5;
+			color: rgba(255, 255, 255, .72);
+			padding: 6px 0;
+		}
+
+		.service-section p::before {
+			content: "—";
+			color: rgba(255, 255, 255, .34);
+			margin-right: 10px;
+		}
+
+		.section {
+			display: grid;
+			grid-template-columns: repeat(12, 1fr);
+			gap: 32px;
+			border-top: 1px solid rgba(255, 255, 255, .1);
+			padding-top: 34px;
+			margin-bottom: 80px;
+		}
+
+		.section h2 {
+			grid-column: 1/4;
+			font-size: 18px;
+			text-transform: uppercase;
+		}
+
+		.section p,
+		.section a {
+			grid-column: 5/11;
+			font-size: 17px;
+			line-height: 1.65;
+			color: rgba(255, 255, 255, .7);
+		}
+
+		.section a {
+			color: #F0FE71;
+			width: fit-content;
+		}
+
+		@media(max-width:900px) {
+			body {
+				padding: 14px
+			}
+
+			.wrapper {
+				padding: 0 20px
+			}
+
+			.close-btn {
+				top: 18px;
+				right: 18px;
+			}
+
+			.hero {
+				min-height: 240px;
+				padding: 90px 0 36px;
+			}
+
+			.grid {
+				grid-template-columns: 1fr;
+			}
+
+			.side,
+			.content {
+				grid-column: 1;
+			}
+
+			.side {
+				position: relative;
+				top: 0;
+			}
+
+			.intro {
+				grid-template-columns: 1fr;
+				gap: 24px;
+			}
+
+			.services {
+				grid-template-columns: 1fr;
+			}
+
+			.service {
+				min-height: auto;
+			}
+
+			.section {
+				grid-template-columns: 1fr;
+			}
+
+			.section h2,
+			.section p,
+			.section a {
+				grid-column: 1;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<a href="javascript:history.back()" class="close-btn" aria-label="Close page">
+		<span></span><span></span>
+	</a>
+
+	<div class="wrapper">
+
+		<header class="hero">
+			<h1>Services<br>& Pricing</h1>
+		</header>
+
+		<main class="grid">
+
+			<aside class="side">
+				<h2>Digital Services</h2>
+				<p class="caption">Portfolio / 2026</p>
+
+				<p>
+					Modern websites, prototypes and web applications for personal brands, startups and small businesses.
+				</p>
+			</aside>
+
+			<section class="content">
+
+				<div class="intro">
+					<p class="lead">
+						I design and build clean, responsive digital products with focus on visual quality, structure and practical
+						functionality.
+					</p>
+
+					<p class="lead">
+						These services are made for people who need a strong online presence, a working prototype or technical help
+						with an existing project.
+					</p>
+				</div>
+
+				<div class="services">
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>Landing / Enkel nettside</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								En ren, moderne og responsiv nettside for personlige merkevarer, tidlige startups eller små bedrifter.
+							</p>
+
+							<div class="price-row">
+								<span>5 000 – 10 000 NOK</span>
+								<span>1–2 uker</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Personlige merkevarer</p>
+								<p>Tidlige startups</p>
+								<p>Små bedrifter</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>Design basert på referanser</p>
+								<p>Responsivt design</p>
+								<p>Grunnleggende SEO</p>
+								<p>Deploy på Vercel</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>MVP / Prototype</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								Et Minimum Viable Product for å validere ideen din og teste den med ekte brukere — raskt.
+							</p>
+
+							<div class="price-row">
+								<span>15 000 – 30 000 NOK</span>
+								<span>3–6 uker</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Gründere med en idé</p>
+								<p>Prosjekter uten teknisk medgründer</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>Idéanalyse</p>
+								<p>Arkitektur</p>
+								<p>Frontend & backend</p>
+								<p>Autentisering</p>
+								<p>Deploy</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>Webapplikasjon</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								En fullverdig liten webapp med brukerfunksjonalitet, database og serverlogikk.
+							</p>
+
+							<div class="price-row">
+								<span>25 000 – 50 000 NOK</span>
+								<span>4–8 uker</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Prosjekter som trenger mer enn en statisk side</p>
+								<p>Digitale produkter</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>React / Next.js</p>
+								<p>REST API</p>
+								<p>Databaseintegrasjon</p>
+								<p>Adminpanel</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>Teknisk hjelp</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								Praktisk teknisk hjelp for eksisterende prosjekter — der du sitter fast.
+							</p>
+
+							<div class="price-row">
+								<span>300 – 600 NOK / time</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Utviklere og gründere som sitter fast</p>
+								<p>Små team og solo-prosjekter</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>Kode- og arkitekturgjennomgang</p>
+								<p>Miljøoppsett</p>
+								<p>Deploy</p>
+								<p>Teknisk veiledning</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>Konsultasjon</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								En fokusert økt for startups og designere som planlegger digitale produkter.
+							</p>
+
+							<div class="price-row">
+								<span>Gratis første møte</span>
+								<span>200–400 NOK oppfølging</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Tidlige startups</p>
+								<p>Nybegynnere</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>Idévurdering</p>
+								<p>MVP-anbefalinger</p>
+								<p>Teknologivalg</p>
+								<p>Roadmap</p>
+							</div>
+						</div>
+					</article>
+
+					<article class="service">
+						<div>
+							<div class="service-top">
+								<h3>Eksperimentelt / Build in Public</h3>
+								<span class="arrow">›</span>
+							</div>
+
+							<p class="service-intro">
+								Prototyper, open-source eksperimenter og utradisjonelle ideer bygget åpent.
+							</p>
+
+							<div class="price-row">
+								<span>Etter avtale</span>
+								<span>Noen ganger gratis</span>
+							</div>
+						</div>
+
+						<div>
+							<div class="service-section">
+								<h4>Passer for</h4>
+								<p>Ikke-standard ideer</p>
+								<p>R&D konsepter</p>
+								<p>Open-source initiativer</p>
+							</div>
+
+							<div class="service-section">
+								<h4>Inkludert</h4>
+								<p>Prototyper</p>
+								<p>Eksperimenter</p>
+								<p>Open-source prosjekter</p>
+							</div>
+						</div>
+					</article>
+
+				</div>
+
+				<section class="section">
+					<h2>Contact</h2>
+					<p>
+						Have a project in mind? Send me a message and I can help you choose the right direction, scope and
+						technology.
+					</p>
+					<a href="mailto:william.berge.gronsberg27@gmail.com">Ta kontakt →</a>
+				</section>
+
+			</section>
+		</main>
+	</div>
+
+</body>
+</html>
