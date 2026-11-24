@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // An admin is a signed-in user with a doc at admins/{uid}.
+    // Create that doc by hand in the Firebase console.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ===== PORTFOLIO ITEMS =====
+    // Anyone can read published items. Only admins can see drafts or write.
+    match /items/{slug} {
+      allow read: if resource.data.status == "published" || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ===== ADMINS =====
+    // A user may check whether they are an admin. Nobody can grant admin from the client.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}
