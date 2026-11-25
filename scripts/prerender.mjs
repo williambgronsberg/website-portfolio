@@ -42,12 +42,12 @@ function render({ path, title, description, image, imageIsDefault }) {
   html = setMeta(html, "description", description);
   for (const key of ["og:title", "twitter:title"]) html = setMeta(html, key, title);
   for (const key of ["og:description", "twitter:description"]) html = setMeta(html, key, description);
-  for (const key of ["og:image", "twitter:image"]) html = setMeta(html, key, image);
+  for (const key of ["og:image", "og:image:secure_url", "twitter:image"]) html = setMeta(html, key, image);
   html = setMeta(html, "og:url", url);
   html = setMeta(html, "og:image:alt", title);
   if (path.startsWith("/p/")) html = setMeta(html, "og:type", "article");
-  // Width/height only describe the default 1200×630 card.
-  if (!imageIsDefault) html = html.replace(/\s*<meta property="og:image:(width|height)" content="\d+">/g, "");
+  // Type/width/height only describe the default 1200×630 PNG card.
+  if (!imageIsDefault) html = html.replace(/\s*<meta property="og:image:(width|height|type)" content="[^"]*">/g, "");
   return html;
 }
 
