@@ -1,6 +1,8 @@
 import { ref } from "vue";
 import {
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
@@ -51,6 +53,17 @@ export function useAuth() {
     return isAdmin.value;
   }
 
+  /** Google sign-in in a popup. Returns whether the account is an admin. */
+  async function loginWithGoogle() {
+    if (!firebaseConfigured) throw Object.assign(new Error("Firebase is not configured"), { code: "app/not-configured" });
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    const cred = await signInWithPopup(auth, provider);
+    currentUser.value = cred.user;
+    isAdmin.value = await checkAdmin(cred.user);
+    return isAdmin.value;
+  }
+
   async function logout() {
     if (firebaseConfigured) await signOut(auth);
     currentUser.value = null;
@@ -68,6 +81,7 @@ export function useAuth() {
     isAdmin,
     ready,
     login,
+    loginWithGoogle,
     logout,
     whenReady,
     sendPasswordReset: (email: string) => sendPasswordResetEmail(auth, email),
