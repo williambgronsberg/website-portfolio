@@ -25,7 +25,7 @@ import {
   query,
   where,
   setDoc,
-  updateDoc,
+  runTransaction,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -80,6 +80,17 @@ function slugify(text) {
 }
 
 const isVideo = (url) => /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url) || url.includes("/video/upload/");
+
+/** Replaces the row with this label (keeping its position), adds it if missing, or removes it when value is empty. */
+function setMetaRow(meta, label, value) {
+  const index = meta.findIndex((m) => m.label === label);
+  if (!value) return meta.filter((m) => m.label !== label);
+  if (index === -1) return [...meta, { label, value }];
+  return meta.map((m, i) => (i === index ? { ...m, value } : m));
+}
+
+/** Errors meant for the assistant (not-found, published, …), as opposed to unexpected failures. */
+class UserError extends Error {}
 
 function buildMeta(category, year) {
   const meta = [];
@@ -247,38 +258,45 @@ server.registerTool(
   ({ slug, ...args }) =>
     run(async () => {
       const ref = doc(db, "items", slug);
-      const snap = await getDoc(ref);
-      if (!snap.exists() || snap.data().kind !== "article") return fail(`No article with slug "${slug}".`);
-      const current = snap.data();
-      if (current.status !== "draft") {
-        return fail(`"${slug}" is published. This tool only edits drafts. Unpublish it in /admin first.`);
-      }
+      // Read, check and write in one transaction, so an article published in /admin
+      // between the check and the write is never modified by this tool.
+      const changed = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists() || snap.data().kind !== "article") throw new UserError(`No article with slug "${slug}".`);
+        const current = snap.data();
+        if (current.status !== "draft") {
+          throw new UserError(`"${slug}" is published. This tool only edits drafts. Unpublish it in /admin first.`);
+        }
 
-      const fields = { updatedAt: serverTimestamp() };
-      if (args.title !== undefined) fields.title = args.title.trim();
-      if (args.summary !== undefined) fields.summary = args.summary.trim();
-      if (args.body !== undefined) fields.body = args.body.trim();
-      if (args.caption !== undefined) fields.caption = args.caption;
-      if (args.hero_url !== undefined) fields.hero = args.hero_url;
-      if (args.featured !== undefined) fields.featured = args.featured;
-      if (args.category !== undefined || args.year !== undefined) {
-        const old = Object.fromEntries((current.meta ?? []).map((m) => [m.label, m.value]));
-        fields.meta = buildMeta(args.category ?? old.Category, args.year ?? old.Year);
-      }
-      if (args.thumbnail_url !== undefined) {
-        fields.thumb = args.thumbnail_url
-          ? {
-              type: isVideo(args.thumbnail_url) ? "video" : "image",
-              url: args.thumbnail_url,
-              alt: args.thumbnail_alt ?? current.thumb?.alt ?? current.title,
-            }
-          : null;
-      } else if (args.thumbnail_alt !== undefined && current.thumb) {
-        fields.thumb = { ...current.thumb, alt: args.thumbnail_alt };
-      }
+        const fields = { updatedAt: serverTimestamp() };
+        if (args.title !== undefined) fields.title = args.title.trim();
+        if (args.summary !== undefined) fields.summary = args.summary.trim();
+        if (args.body !== undefined) fields.body = args.body.trim();
+        if (args.caption !== undefined) fields.caption = args.caption;
+        if (args.hero_url !== undefined) fields.hero = args.hero_url;
+        if (args.featured !== undefined) fields.featured = args.featured;
+        if (args.category !== undefined || args.year !== undefined) {
+          // Only touch the Category/Year rows; keep any other rows added in /admin.
+          let meta = current.meta ?? [];
+          if (args.category !== undefined) meta = setMetaRow(meta, "Category", args.category);
+          if (args.year !== undefined) meta = setMetaRow(meta, "Year", String(args.year));
+          fields.meta = meta;
+        }
+        if (args.thumbnail_url !== undefined) {
+          fields.thumb = args.thumbnail_url
+            ? {
+                type: isVideo(args.thumbnail_url) ? "video" : "image",
+                url: args.thumbnail_url,
+                alt: args.thumbnail_alt ?? current.thumb?.alt ?? current.title,
+              }
+            : null;
+        } else if (args.thumbnail_alt !== undefined && current.thumb) {
+          fields.thumb = { ...current.thumb, alt: args.thumbnail_alt };
+        }
 
-      await updateDoc(ref, fields);
-      const changed = Object.keys(fields).filter((k) => k !== "updatedAt");
+        tx.update(ref, fields);
+        return Object.keys(fields).filter((k) => k !== "updatedAt");
+      });
       return text({ updated: slug, changed, status: "draft", ...links(slug) });
     })
 );
