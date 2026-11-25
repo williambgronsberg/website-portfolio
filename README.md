@@ -85,3 +85,30 @@ npm run preview    # serve dist/ like GitHub Pages
 | Firestore storage | 1 GB |
 
 A portfolio uses a tiny fraction of this. On the Spark plan, Firebase stops serving when a limit is hit. It never bills you.
+
+---
+
+## Google login
+
+`/admin` has a **Continue with Google** button. Turn it on once in Firebase under **Authentication → Sign-in method → Add new provider → Google → Enable**. Only Google accounts that have an `admins/<uid>` document can get in.
+
+## MCP: write article drafts with Claude
+
+`mcp/server.mjs` is an MCP server with four tools: `list_articles`, `get_article`, `create_article_draft` and `update_article_draft`. It is **draft-only**: it can't publish, unpublish or delete, and you publish drafts yourself in `/admin`.
+
+It signs in as a separate bot admin account, so the Firestore rules still apply.
+
+Setup (once):
+1. In Firebase, go to **Authentication → Users → Add user** and create the bot, for example `mcp-bot@williambgronsberg.no` with a long random password.
+2. Copy its **User UID**. In **Firestore**, create `admins/<that UID>`.
+3. Install and register the server:
+   ```bash
+   cd mcp && npm install
+   claude mcp add portfolio -s user \
+     -e PORTFOLIO_MCP_EMAIL=mcp-bot@williambgronsberg.no \
+     -e PORTFOLIO_MCP_PASSWORD='<the password>' \
+     -- node "$(pwd)/server.mjs"
+   ```
+4. Ask Claude something like *"Write a draft article about …"*.
+
+To revoke access, delete `admins/<bot UID>` in Firestore, or delete the bot user.

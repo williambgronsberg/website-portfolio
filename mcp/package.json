@@ -1,0 +1,18 @@
+{
+  "name": "wbg-portfolio-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for publishing articles to williambgronsberg.no",
+  "bin": {
+    "wbg-portfolio-mcp": "server.mjs"
+  },
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "firebase": "^13.4.0",
+    "zod": "^4.6.7"
+  }
+}

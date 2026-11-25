@@ -415,6 +415,31 @@ select.input { appearance: auto; }
 	margin-bottom: 24px;
 }
 
+.google-btn {
+	height: 46px;
+	gap: 10px;
+	font-weight: 600;
+}
+
+.login-divider {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 22px 0;
+	font-family: monospace;
+	font-size: 11px;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--text-tertiary);
+}
+
+.login-divider::before,
+.login-divider::after {
+	content: "";
+	flex: 1;
+	border-top: 1px solid var(--separator);
+}
+
 .login-back {
 	display: inline-block;
 	margin-top: 18px;
